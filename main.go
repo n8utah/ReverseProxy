@@ -3,7 +3,8 @@ package main
 import (
 	"flag"
 	"log"
-	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 var port *string
@@ -32,17 +33,17 @@ func main() {
 	proxs.NewProxy("http://localhost", "http://127.0.0.1:80")
 	proxs.NewProxy("http://127.0.0.2:80", "http://127.0.0.1:81")
 
-	http.HandleFunc("/proxyServer", ProxyServer)
+	router := gin.Default()
+	// config := cors.DefaultConfig()
+	// config.AllowOrigins = []string{"http://localhost:80", "http://localhost"}
+	// config.AllowHeaders = []string{"Authorization"}
+	// config.MaxAge = 12 * time.Hour
+	// router.Use(cors.New(config))
 
-	// server redirection
-	http.HandleFunc("/", proxs.handle)
-	log.Fatal(http.ListenAndServe(":"+*port, nil))
+	router.NoRoute(proxs.ginHandle)
+	log.Fatal(router.Run(":" + *port))
 }
 
-func ProxyServer(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Reverse proxy Server Running. Accepting at port:" + *port))
-}
-
-func UnknownProxyServer(w http.ResponseWriter, r *http.Request) {
+func UnknownProxyServer(c *gin.Context) {
 	w.Write([]byte("Reverse proxy Server Running. Proxy not found"))
 }

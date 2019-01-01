@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Prox struct {
@@ -33,9 +35,9 @@ func (ps *Proxies) NewProxy(host string, target string) {
 
 //handle checks the source and see if it matches any of the
 //proxies we have setup
-func (ps *Proxies) handle(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("X-GoProxy", "GoProxy")
-	url, err := url.Parse("http://" + r.Host)
+func (ps *Proxies) ginHandle(c *gin.Context) {
+	c.Writer.Header().Set("X-GoProxy", "GoProxy")
+	url, err := url.Parse("http://" + c.Request.Host)
 	if err != nil {
 		fmt.Println("Parse Error:" + err.Error())
 		return
@@ -46,19 +48,18 @@ func (ps *Proxies) handle(w http.ResponseWriter, r *http.Request) {
 	for i, _ := range *ps {
 		if url.Hostname() == (*ps)[i].host.Hostname() {
 			(*ps)[i].proxy.Transport = &myTransport{}
-			(*ps)[i].proxy.ServeHTTP(w, r)
+			(*ps)[i].proxy.ServeHTTP(c.Writer, c.Request)
 			return
 		}
 	} //EO go through proxies
 
 	//if not found then we serve up the default
-	UnknownProxyServer(w, r)
+	UnknownProxyServer(c)
 	return
 }
 
 var proxs Proxies
 
-func AddProxyHandle(w http.ResponseWriter, r *http.Request) {
-
-	w.Write([]byte("Reverse proxy Server Running. Accepting at port:" + *port))
+func AddProxyHandle(c *gin.Context) {
+	c.JSON(http.StatusOK, "Reverse proxy Server Running. Accepting at port:"+*port)
 }
