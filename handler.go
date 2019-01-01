@@ -27,7 +27,11 @@ var globalMap = make(map[string]Montioringpath)
 func (t *myTransport) RoundTrip(request *http.Request) (*http.Response, error) {
 
 	fmt.Println("---------------------------New Request--------------------------------------------------")
-	buf, _ := ioutil.ReadAll(request.Body)
+
+	buf := make([]byte, 0)
+	if request.Body != nil {
+		buf, _ = ioutil.ReadAll(request.Body)
+	}
 	rdr1 := ioutil.NopCloser(bytes.NewBuffer(buf))
 	rdr2 := ioutil.NopCloser(bytes.NewBuffer(buf))
 
