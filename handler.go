@@ -74,7 +74,8 @@ func (t *myTransport) RoundTrip(request *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 
-	log.Println("Response Body : ", string(body))
+	// log.Println("Response Body : ", string(body))
+	log.Println("Response Body Size: ", len(body))
 	log.Println("Response Time:", elapsed.Nanoseconds())
 
 	fmt.Println("Analysis on different Path :", string(b))
