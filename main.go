@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -45,5 +46,5 @@ func main() {
 }
 
 func UnknownProxyServer(c *gin.Context) {
-	w.Write([]byte("Reverse proxy Server Running. Proxy not found"))
+	c.JSON(http.StatusOK, "Reverse proxy Server Running. Proxy not found")
 }
